@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>时间线</title>
+<title>时间线 · v1.5.2</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
@@ -25,6 +25,7 @@
   --warn:#c88a3f;
   --err:#bd5f4e;
   --dot:#bf6f42;
+  --time-c:#8c7d6e;
   --r:10px;
   --f:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;
 }
@@ -36,7 +37,7 @@
     --t1:#efe9e1;--t2:#b3a99d;--tm:#736a5f;
     --acc:#e0916a;--acc-bg:rgba(224,145,106,.13);
     --acc-t:#eeb18d;--acc-b:rgba(224,145,106,.35);
-    --ok:#93b189;--warn:#dba565;--err:#d67f6d;--dot:#e0916a;
+    --ok:#93b189;--warn:#dba565;--err:#d67f6d;--dot:#e0916a;--time-c:#d9cec0;
   }
 }
 
@@ -78,14 +79,39 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .card{background:var(--surface);border:0.5px solid var(--border);border-radius:12px;padding:1rem 1.25rem}
 
 /* ── Page header ── */
-.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.75rem;gap:12px;flex-wrap:wrap}
+.hdr{margin-bottom:1.75rem;position:relative}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .hdr h1{font-size:22px;font-weight:500}
 .hdr-sub{font-size:13px;color:var(--tm);margin-top:3px}
 .hdr-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;flex-wrap:wrap}
 .inp-filter{font-size:12px;padding:5px 9px}
 .inp-filter-year{width:78px}
 .inp-filter-month{width:66px}
-.inp-filter-search{width:150px}
+.inp-filter-search{width:140px}
+
+/* Import/export toolbar — its own row directly under the title/actions
+   row (one button-position lower than the old floating placement above
+   the header), always visible rather than only on hover. */
+.hdr-toolbar{
+  display:flex;justify-content:flex-end;
+  margin-top:6px;
+}
+.io-wrap{position:relative}
+.io-btn{color:var(--tm)}
+.io-btn:hover{color:var(--acc-t);background:var(--muted)}
+.io-menu{
+  position:absolute;top:calc(100% + 4px);right:0;z-index:20;
+  background:var(--surface);border:0.5px solid var(--border-s);border-radius:var(--r);
+  box-shadow:0 4px 16px rgba(0,0,0,.10);padding:4px;min-width:172px;
+  display:flex;flex-direction:column;gap:1px;
+}
+.io-menu button{
+  display:flex;align-items:center;gap:7px;
+  background:none;border:none;text-align:left;white-space:nowrap;
+  font-family:var(--f);font-size:12px;color:var(--t2);
+  padding:7px 9px;border-radius:6px;cursor:pointer;
+}
+.io-menu button:hover{background:var(--muted);color:var(--t1)}
 
 /* ── Add form ── */
 .add-form{
@@ -124,7 +150,7 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .time-col.editing{width:190px;text-align:left;padding-top:0}
 .time-col .inp-date{font-size:11px}
 .e-time{
-  font-size:18px;font-weight:600;color:var(--t1);
+  font-size:18px;font-weight:600;color:var(--time-c);
   display:block;letter-spacing:.03em;
   font-variant-numeric:tabular-nums;line-height:1.2;
 }
@@ -250,6 +276,21 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--border-s);border-radius:3px}
+/* ── Electron sidebar mode (added by the "sidebar-mode" class, applied
+   only when running inside the Electron shell — see the bottom of the
+   main JS block below) ── */
+html.sidebar-mode, html.sidebar-mode body{height:100%}
+html.sidebar-mode body{overflow-x:hidden;overflow-y:auto}
+html.sidebar-mode .app{max-width:none;padding:1.5rem 1rem 2.5rem}
+html.sidebar-mode .hdr{flex-direction:column;align-items:stretch;gap:10px}
+html.sidebar-mode .hdr-actions{width:100%}
+html.sidebar-mode .inp-filter-search{flex:1;width:auto;min-width:0}
+/* Frameless window has no title bar — give the top a small grab-free margin
+   so the pin button doesn't sit flush against the OS screen edge. */
+html.sidebar-mode .app{padding-top:1.1rem}
+
+.pin-btn svg{transition:transform .15s}
+.pin-btn.btn-acc svg{transform:rotate(-40deg)}
 </style>
 </head>
 <body>
@@ -484,6 +525,134 @@ window.toggleFavFilter = () => {
     btn.innerHTML = icon('star', 14, filterFavOnly);
   }
   renderAll();
+};
+
+/* ── Data import / export ──
+   The toolbar sits in its own row under the header and is always visible;
+   clicking the button opens a small menu with three options. Export writes
+   a JSON snapshot. Import offers two modes: "全覆盖" replaces all entries
+   after a confirmation (full backup/restore), and "仅增加不重复" merges in
+   only the entries that don't already exist (matched by datetime+content),
+   leaving current data untouched. */
+window.toggleIOMenu = (event) => {
+  event.stopPropagation();
+  const menu = document.getElementById('io-menu');
+  const wrap = document.querySelector('.hdr-toolbar');
+  if (!menu) return;
+  const willOpen = menu.style.display === 'none';
+  menu.style.display = willOpen ? 'flex' : 'none';
+  if (wrap) wrap.classList.toggle('open', willOpen);
+};
+document.addEventListener('click', (event) => {
+  const wrap = document.querySelector('.hdr-toolbar');
+  const menu = document.getElementById('io-menu');
+  if (!wrap || !menu || menu.style.display === 'none') return;
+  if (!wrap.contains(event.target)) {
+    menu.style.display = 'none';
+    wrap.classList.remove('open');
+  }
+});
+
+window.doExport = () => {
+  const payload = {
+    app: 'timeline',
+    version: '1.5.2',
+    exportedAt: new Date().toISOString(),
+    entries,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `时间线备份-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  window.toggleIOMenu({ stopPropagation(){} });
+};
+
+function parseImportFile(file, onParsed) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    let parsed;
+    try { parsed = JSON.parse(String(reader.result)); }
+    catch { alert('导入失败：文件不是合法的 JSON。'); return; }
+
+    const raw = Array.isArray(parsed) ? parsed
+      : Array.isArray(parsed && parsed.entries) ? parsed.entries
+      : null;
+    if (!raw) { alert('导入失败：文件中找不到有效的节点数据。'); return; }
+
+    const imported = raw
+      .filter(e => e && (e.datetime || e.date))
+      .map(e => ({
+        id: e.id || uid(),
+        datetime: normDT(e.datetime || e.date || ''),
+        title: e.title || '',
+        content: e.content || '',
+        favorite: !!e.favorite,
+        cols: [1, 2, 3, 4].includes(e.cols) ? e.cols : 2,
+        colTitles: Array.isArray(e.colTitles) ? e.colTitles.map(String) : [],
+        todos: Array.isArray(e.todos) ? e.todos.map(t => ({
+          id: t.id || uid(),
+          text: t.text || '',
+          done: !!t.done,
+          col: Number.isInteger(t.col) ? t.col : 0,
+        })) : [],
+      }));
+
+    if (!imported.length) { alert('导入失败：文件中找不到有效的节点数据。'); return; }
+    onParsed(imported);
+  };
+  reader.readAsText(file);
+}
+
+/* 全覆盖：用导入的数据整体替换当前所有节点 */
+window.doImportOverwrite = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/json,.json';
+  input.onchange = () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    parseImportFile(file, (imported) => {
+      if (!confirm(`将导入 ${imported.length} 个节点，并替换当前所有数据，确定继续吗？`)) return;
+      entries = imported;
+      save();
+      renderAll();
+      alert(`导入成功，共 ${imported.length} 个节点。`);
+    });
+  };
+  input.click();
+  window.toggleIOMenu({ stopPropagation(){} });
+};
+
+/* 仅增加不重复：跳过与现有节点 datetime+content 完全一致的条目，其余追加到末尾 */
+window.doImportMerge = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = 'application/json,.json';
+  input.onchange = () => {
+    const file = input.files && input.files[0];
+    if (!file) return;
+    parseImportFile(file, (imported) => {
+      const existingKeys = new Set(entries.map(e => `${e.datetime}||${e.content}`));
+      const toAdd = imported.filter(e => !existingKeys.has(`${e.datetime}||${e.content}`));
+
+      if (!toAdd.length) { alert('没有发现新节点，所有数据均已存在，未做任何改动。'); return; }
+      const skipped = imported.length - toAdd.length;
+      const skipMsg = skipped > 0 ? `（已跳过 ${skipped} 个重复节点）` : '';
+      if (!confirm(`将新增 ${toAdd.length} 个节点${skipMsg}，确定继续吗？`)) return;
+
+      entries = [...entries, ...toAdd];
+      save();
+      renderAll();
+      alert(`导入成功，新增 ${toAdd.length} 个节点。`);
+    });
+  };
+  input.click();
+  window.toggleIOMenu({ stopPropagation(){} });
 };
 
 /* ── Month filter (clearable) ──
@@ -773,7 +942,11 @@ function icon(name, size, filled) {
     doc   :`<path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/>`,
     search:`<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>`,
     star  :`<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>`,
-    grip  :`<circle cx="9" cy="6" r="1.4"/><circle cx="15" cy="6" r="1.4"/><circle cx="9" cy="12" r="1.4"/><circle cx="15" cy="12" r="1.4"/><circle cx="9" cy="18" r="1.4"/><circle cx="15" cy="18" r="1.4"/>`,
+    grip  :`<line x1="9" y1="5" x2="9" y2="19"/><line x1="15" y1="5" x2="15" y2="19"/>`,
+    pin   :`<path d="M12 17v5"/><path d="M8.5 4.5h7l-.7 6.3L18 13.5v2H6v-2l3.2-2.7z"/>`,
+    io    :`<path d="M12 3v10"/><path d="M8.5 9.5L12 13l3.5-3.5"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"/>`,
+    down  :`<path d="M12 5v11"/><path d="M8 12l4 4 4-4"/>`,
+    up    :`<path d="M12 19V8"/><path d="M8 11l4-4 4 4"/>`,
   };
   return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d[name]||''}</svg>`;
 }
@@ -837,47 +1010,64 @@ function renderAll() {
 
 function buildHeader() {
   return `
-    <div>
-      <h1>时间线</h1>
-      <p class="hdr-sub">${greetingText()}</p>
+    <div class="hdr-top">
+      <div>
+        <h1>时间线</h1>
+        <p class="hdr-sub">${greetingText()}</p>
+      </div>
+      <div class="hdr-actions">
+        ${window.sidebarAPI ? `<button id="pin-btn" class="btn btn-icon pin-btn" title="固定侧栏（关闭后自动隐藏）"
+          aria-label="固定侧栏" onclick="onPinClick()">${icon('pin', 14)}</button>` : ''}
+        <input id="filter-search" class="inp inp-filter inp-filter-search" type="text"
+          placeholder="搜索标题/内容/待办…"
+          value="${esc(filterQuery)}"
+          oninput="onSearchInput(this)"
+          oncompositionstart="onSearchCompositionStart()"
+          oncompositionend="onSearchCompositionEnd(this)">
+        <select id="filter-year" class="inp inp-filter inp-filter-year" title="按年份筛选"
+          onchange="onMonthFilterChange()">
+          <option value="">年份</option>
+          ${getYearOptions().map(y => `<option value="${y}"${y === filterMonth.slice(0,4) ? ' selected' : ''}>${y}</option>`).join('')}
+        </select>
+        <select id="filter-monthnum" class="inp inp-filter inp-filter-month" title="按月份筛选"
+          onchange="onMonthFilterChange()">
+          <option value="">月份</option>
+          ${Array.from({length:12}, (_, i) => String(i+1).padStart(2,'0')).map(m =>
+            `<option value="${m}"${m === filterMonth.slice(5,7) ? ' selected' : ''}>${parseInt(m,10)}月</option>`
+          ).join('')}
+        </select>
+        <button id="month-clear-btn" class="btn btn-icon-sm" title="清除月份筛选" aria-label="清除月份筛选"
+          style="display:${filterMonth ? 'inline-flex' : 'none'}"
+          onclick="clearFilterMonth()">✕</button>
+        <button id="fav-filter-btn" class="btn btn-icon${filterFavOnly ? ' btn-acc' : ''}"
+          title="只看收藏" aria-label="只看收藏"
+          onclick="toggleFavFilter()">${icon('star', 14, filterFavOnly)}</button>
+        <button id="add-btn" class="btn btn-icon${addFormOpen ? ' btn-acc' : ''}" title="添加节点" aria-label="添加节点" onclick="toggleAddForm()">
+          ${icon('plus', 15)}
+        </button>
+      </div>
     </div>
-    <div class="hdr-actions">
-      <select id="filter-year" class="inp inp-filter inp-filter-year" title="按年份筛选"
-        onchange="onMonthFilterChange()">
-        <option value="">年份</option>
-        ${getYearOptions().map(y => `<option value="${y}"${y === filterMonth.slice(0,4) ? ' selected' : ''}>${y}</option>`).join('')}
-      </select>
-      <select id="filter-monthnum" class="inp inp-filter inp-filter-month" title="按月份筛选"
-        onchange="onMonthFilterChange()">
-        <option value="">月份</option>
-        ${Array.from({length:12}, (_, i) => String(i+1).padStart(2,'0')).map(m =>
-          `<option value="${m}"${m === filterMonth.slice(5,7) ? ' selected' : ''}>${parseInt(m,10)}月</option>`
-        ).join('')}
-      </select>
-      <button id="month-clear-btn" class="btn btn-icon-sm" title="清除月份筛选" aria-label="清除月份筛选"
-        style="display:${filterMonth ? 'inline-flex' : 'none'}"
-        onclick="clearFilterMonth()">✕</button>
-      <input id="filter-search" class="inp inp-filter inp-filter-search" type="text"
-        placeholder="搜索标题/内容/待办…"
-        value="${esc(filterQuery)}"
-        oninput="onSearchInput(this)"
-        oncompositionstart="onSearchCompositionStart()"
-        oncompositionend="onSearchCompositionEnd(this)">
-      <button id="fav-filter-btn" class="btn btn-icon${filterFavOnly ? ' btn-acc' : ''}"
-        title="只看收藏" aria-label="只看收藏"
-        onclick="toggleFavFilter()">${icon('star', 14, filterFavOnly)}</button>
-      <button id="add-btn" class="btn${addFormOpen ? ' btn-acc' : ''}" onclick="toggleAddForm()">
-        ${icon('plus', 13)} 添加节点
-      </button>
+    <div class="hdr-toolbar">
+      <div class="io-wrap">
+        <button id="io-btn" class="btn btn-icon-sm io-btn" title="数据导入/导出" aria-label="数据导入/导出"
+          onclick="toggleIOMenu(event)">${icon('io', 14)}</button>
+        <div id="io-menu" class="io-menu" style="display:none">
+          <button onclick="doExport()">${icon('down', 13)} 数据导出</button>
+          <button onclick="doImportOverwrite()">${icon('up', 13)} 导入（全覆盖）</button>
+          <button onclick="doImportMerge()">${icon('up', 13)} 导入（仅增加不重复）</button>
+        </div>
+      </div>
     </div>`;
 }
+
 
 function buildAddForm() {
   return `
   <div class="add-form">
     <textarea class="ta" id="nw-content" maxlength="${MAX}"
-      placeholder="描述内容（支持换行，最多 ${MAX} 字符）"
-      oninput="onTaChange(this,'new')"></textarea>
+      placeholder="描述内容（支持换行，最多 ${MAX} 字符；Enter 保存 / Shift+Enter 换行）"
+      oninput="onTaChange(this,'new')"
+      onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();createEntry();}"></textarea>
     <div class="char-cc">0 / ${MAX}</div>
     <div class="form-foot" style="margin-top:10px">
       <input class="inp inp-date" type="datetime-local" step="1" id="nw-date"
@@ -962,8 +1152,9 @@ function buildEntry(e, isNewest) {
   const contentHtml = isEdit
     ? `<div style="margin-bottom:14px">
         <textarea class="ta" id="ed-ta" maxlength="${MAX}"
-          placeholder="输入正文，支持换行（最多 ${MAX} 字符）"
-          oninput="onTaChange(this,'content')">${esc(content)}</textarea>
+          placeholder="输入正文，支持换行（最多 ${MAX} 字符；Enter 保存 / Shift+Enter 换行）"
+          oninput="onTaChange(this,'content')"
+          onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();saveEdit('${e.id}');}">${esc(content)}</textarea>
         <div class="char-cc" style="color:${cLen>MAX*.85?'var(--warn)':'var(--tm)'}">${cLen} / ${MAX}</div>
        </div>`
     : e.content
@@ -974,7 +1165,7 @@ function buildEntry(e, isNewest) {
   const colsSw = isEdit
     ? `<div class="cols-sw">
         <span class="cols-lbl">项目数</span>
-        ${[2,3,4].map(n =>
+        ${[1,2,3,4].map(n =>
           `<button class="col-btn${cols===n?' on':''}" onclick="setDraftCols(${n})">${n}</button>`
         ).join('')}
        </div>`
@@ -1074,6 +1265,27 @@ function buildEntry(e, isNewest) {
       </div>
     </div>
   </div>`;
+}
+
+/* ── Electron sidebar integration (no-ops when opened as a plain web page,
+   since window.sidebarAPI only exists inside the Electron preload) ── */
+window.onPinClick = () => { window.sidebarAPI && window.sidebarAPI.togglePin(); };
+
+function applyPinnedUI(isPinned) {
+  const btn = document.getElementById('pin-btn');
+  if (!btn) return;
+  btn.classList.toggle('btn-acc', isPinned);
+  btn.title = isPinned ? '取消固定（将恢复悬停自动隐藏）' : '固定侧栏（关闭后自动隐藏）';
+}
+
+if (window.sidebarAPI) {
+  document.documentElement.classList.add('sidebar-mode');
+  window.sidebarAPI.getPinned().then(applyPinnedUI);
+  window.sidebarAPI.onPinnedChanged(applyPinnedUI);
+  // Keep the sidebar expanded while the cursor is over it; let the main
+  // process schedule an auto-hide once the cursor leaves (unless pinned).
+  document.addEventListener('mouseenter', () => window.sidebarAPI.enter());
+  document.addEventListener('mouseleave', () => window.sidebarAPI.leave());
 }
 
 /* ── Boot ── */

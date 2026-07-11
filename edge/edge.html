@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  html,body{margin:0;padding:0;width:100%;height:100%;background:transparent;overflow:hidden}
+  .bar{
+    width:100%;height:100%;
+    background:rgba(191,111,66,0);
+    border-radius:0 3px 3px 0;
+    transition:background .18s ease;
+  }
+  body:hover .bar{background:rgba(191,111,66,.45)}
+</style>
+</head>
+<body>
+<div class="bar"></div>
+<script>
+  // Any hover on this sliver means the cursor is at the screen's left edge —
+  // tell the main process to slide the sidebar into view.
+  document.addEventListener('mouseenter', () => {
+    window.sidebarAPI && window.sidebarAPI.edgeEnter();
+  });
+</script>
+</body>
+</html>
