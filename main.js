@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, screen, ipcMain, Tray, Menu, nativeImage, nativeTheme } = require('electron');
+const { app, BrowserWindow, screen, ipcMain, Tray, Menu, nativeImage, nativeTheme, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -48,7 +48,7 @@ function workArea() {
 function createSidebarWindow() {
   const wa = workArea();
   sidebarWin = new BrowserWindow({
-    title: '时间线 · v1.5.2',
+    title: '',
     width: SIDEBAR_WIDTH,
     height: wa.height,
     x: wa.x - SIDEBAR_WIDTH, // always start off-screen; shown explicitly below
@@ -221,6 +221,45 @@ function setPinned(next) {
   if (sidebarWin) sidebarWin.webContents.send('sidebar:pinned-changed', pinned);
 }
 
+/* ── Data import/export (menu-triggered) ──
+   The in-window button was removed since the sidebar is a small hover
+   panel; export/import now live in the tray menu instead. Reveal the
+   sidebar first so the user sees the result (save dialog / confirm
+   alert / success message) land somewhere visible.
+
+   Import specifically has to open its file picker from HERE (the main
+   process), not by asking the renderer to synthesize a click on an
+   <input type="file">. Chromium requires a "user activation" that's
+   still in effect on the *page* for that trick to work, and a click on
+   a native OS tray menu never touches the page at all — so the old
+   approach just silently did nothing when triggered from the tray.
+   dialog.showOpenDialog is a native call from main, unaffected by that
+   restriction, which is exactly the right tool for a menu-triggered
+   action like this. */
+function triggerDataAction(channel) {
+  showSidebar();
+  if (sidebarWin) sidebarWin.webContents.send(channel);
+}
+
+async function triggerImportAction(mode) {
+  showSidebar();
+  if (!sidebarWin) return;
+  const result = await dialog.showOpenDialog(sidebarWin, {
+    title: '选择要导入的备份文件',
+    filters: [{ name: 'JSON', extensions: ['json'] }],
+    properties: ['openFile'],
+  });
+  if (result.canceled || !result.filePaths.length) return;
+  let content;
+  try {
+    content = fs.readFileSync(result.filePaths[0], 'utf-8');
+  } catch (err) {
+    dialog.showErrorBox('导入失败', `无法读取文件：${err.message || err}`);
+    return;
+  }
+  sidebarWin.webContents.send('data:import-file', { mode, content });
+}
+
 /* ── Tray (since the window has no taskbar entry / dock icon) ── */
 function trayIconImage() {
   const p = path.join(__dirname, 'assets', 'icon.png');
@@ -240,6 +279,14 @@ function updateTrayMenu() {
         { label: '浅色模式', type: 'radio', checked: theme === 'light', click: () => setTheme('light') },
         { label: '深色模式', type: 'radio', checked: theme === 'dark', click: () => setTheme('dark') },
         { label: '跟随系统', type: 'radio', checked: theme === 'system', click: () => setTheme('system') },
+      ],
+    },
+    {
+      label: '数据',
+      submenu: [
+        { label: '数据导出', click: () => triggerDataAction('data:export') },
+        { label: '导入（全覆盖）', click: () => triggerImportAction('overwrite') },
+        { label: '导入（仅增加不重复）', click: () => triggerImportAction('merge') },
       ],
     },
     { type: 'separator' },

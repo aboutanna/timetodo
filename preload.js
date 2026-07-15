@@ -12,4 +12,12 @@ contextBridge.exposeInMainWorld('sidebarAPI', {
   togglePin: () => ipcRenderer.send('sidebar:toggle-pin'),
   getPinned: () => ipcRenderer.invoke('sidebar:get-pinned'),
   onPinnedChanged: (cb) => ipcRenderer.on('sidebar:pinned-changed', (_e, val) => cb(val)),
+
+  // fired when the corresponding tray-menu item is clicked, since the
+  // import/export button was removed from the sidebar window itself.
+  // Import's file picker runs natively in the main process (see main.js
+  // for why), so this arrives with the file content already read — the
+  // renderer only has to parse and apply it, no <input type="file"> needed.
+  onExportRequested: (cb) => ipcRenderer.on('data:export', () => cb()),
+  onImportFile: (cb) => ipcRenderer.on('data:import-file', (_e, payload) => cb(payload)),
 });
