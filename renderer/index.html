@@ -158,7 +158,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 
 /* ── Time column (left of the spine) ── */
 .time-col{width:var(--time-col-w);flex-shrink:0;text-align:right;padding-top:15px}
-.time-col.editing{width:190px;text-align:left;padding-top:0}
 .time-col .inp-date{font-size:11px}
 .e-date-hd{
   font-size:26px;font-weight:600;color:var(--time-c);
@@ -192,7 +191,6 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
   .e-date-hd{font-size:20px}
   .e-date-suffix{font-size:9px}
   .e-time{font-size:10px}
-  .time-col.editing{width:150px}
 }
 .e-content{font-size:14px;color:var(--t1);line-height:1.75;white-space:pre-wrap;margin-bottom:12px}
 .char-cc{font-size:11px;text-align:right;margin-top:4px;color:var(--tm)}
@@ -201,93 +199,71 @@ body{font-family:var(--f);background:var(--bg);color:var(--t1);min-height:100vh;
 .confirm-row{display:flex;align-items:center;gap:6px}
 .confirm-txt{font-size:12px;color:var(--t2);white-space:nowrap}
 
-/* ── Edit header inputs ── */
-.edit-row{display:flex;gap:8px;flex:1;flex-wrap:wrap}
+/* ── Add-form date input ── */
 .inp-date{font-size:12px;flex-shrink:0;min-width:185px;width:auto}
-.inp-title{flex:1 1 140px;font-size:15px;font-weight:500}
 
-/* ── Todos ── */
-.todos{border-top:0.5px solid var(--border);padding-top:10px}
-.todos-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
-.todos-lbl{font-size:11px;font-weight:500;color:var(--t2);text-transform:uppercase;letter-spacing:.05em}
-.todos-cnt{font-weight:400;color:var(--tm);text-transform:none;margin-left:5px}
-.cols-sw{display:flex;gap:2px;align-items:center;background:var(--muted);border-radius:999px;padding:2px}
-.cols-lbl{font-size:11px;color:var(--tm);margin-right:4px;padding-left:6px}
-.col-btn{
-  font-size:11px;font-weight:600;width:22px;height:22px;border:none;border-radius:999px;
-  background:transparent;color:var(--t2);cursor:pointer;font-family:var(--f);
-  display:flex;align-items:center;justify-content:center;
-  transition:background .12s,color .12s;
-}
-.col-btn.on{background:var(--surface);color:var(--acc-t);box-shadow:0 1px 3px rgba(0,0,0,.12)}
-
-/* ── Todo grid ── */
-.todos-grid{display:grid;gap:0;margin-bottom:8px}
-
-/* ── Column wrapper for drag-drop (each column = one "project") ── */
-.todo-col{
-  min-height:32px;padding:2px 10px;
-  border-radius:6px;transition:background .15s;
-  position:relative;
-}
-.todo-col.drag-over{
-  background:var(--acc-bg);
-  outline:1.5px dashed var(--acc-b);
-}
-.todo-col.col-drag-over{
-  background:var(--acc-bg);
-  outline:1.5px dashed var(--acc-b);
-}
-.todo-col.col-dragging{opacity:.4}
-/* Vertical column separator — bg-color, inset top/bottom */
-.todo-col:not(:last-child)::after{
-  content:'';position:absolute;
-  right:0;top:6px;bottom:6px;
-  width:1px;background:var(--bg);
-}
-
-/* ── Column head: drag-handle + editable project title ── */
-.col-head{display:flex;align-items:center;gap:4px;margin-bottom:7px}
-.col-grip{
-  cursor:grab;color:var(--tm);flex-shrink:0;display:flex;
-  opacity:.55;
-}
-.col-grip:hover{opacity:1}
-.col-grip:active{cursor:grabbing}
-.col-grip svg{pointer-events:none}
-.col-title-inp{
-  font-size:11px;font-weight:500;padding:4px 7px;
-  color:var(--t2);
-}
-.col-title-txt{
-  font-size:11px;font-weight:500;color:var(--t2);
-  padding:4px 7px;overflow:hidden;text-overflow:ellipsis;
-  white-space:nowrap;flex:1;min-width:0;
-}
-.col-title-empty{color:var(--tm);font-style:italic}
-
+/* ── Todo entries: optional project title + a flat single-column list.
+   No edit mode exists anymore — checking items off is still allowed
+   (that's just using the list), but the item set/order is fixed once
+   created, so there's no drag-reorder or per-item delete here. ── */
+.proj-title{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:10px}
+.todo-list{display:flex;flex-direction:column}
 .todo-item{
-  display:flex;align-items:flex-start;gap:5px;padding:5px 0;
+  display:flex;align-items:flex-start;gap:7px;padding:6px 0;
   border-bottom:0.5px solid var(--border);
-  cursor:grab;user-select:none;
-  transition:opacity .15s;
 }
-.todo-item:active{cursor:grabbing}
-.todo-item.dragging{opacity:.35}
-.todo-item.drop-before{border-top:2px solid var(--acc);margin-top:-1px}
-.todo-item.drop-after{border-bottom:2px solid var(--acc);margin-bottom:-1px}
+.todo-item:last-child{border-bottom:none}
 .t-check{background:none;border:none;cursor:pointer;padding:0;display:flex;align-items:center;line-height:1;flex-shrink:0;margin-top:2px;opacity:.85}
 .t-check:hover{opacity:1}
-.t-text{flex:1;font-size:12px;line-height:1.5;word-break:break-word;color:var(--t2)}
+.t-text{flex:1;font-size:13px;line-height:1.6;word-break:break-word;color:var(--t2)}
 .t-text.done{text-decoration:line-through;color:var(--tm)}
-.t-del{background:none;border:none;cursor:pointer;padding:0;color:var(--tm);flex-shrink:0;font-size:16px;line-height:1;font-family:var(--f)}
-.t-del:hover{color:var(--err)}
+.todo-empty{font-size:12px;color:var(--tm);padding:4px 0}
 
-/* ── Add todo — edit mode only ── */
-.add-todo-edit{padding-top:8px}
-.add-todo-edit .inp{font-size:12px;color:var(--t2)}
+/* ── Draft todo list (add-form only) — items here ARE still removable,
+   since the entry hasn't been created yet. ── */
+.draft-todo{
+  display:flex;align-items:center;gap:7px;padding:5px 0;
+  border-bottom:0.5px solid var(--border);
+}
+.draft-todo:last-child{border-bottom:none}
+.draft-todo .t-text{color:var(--t1)}
+.draft-todo-del{
+  background:none;border:none;cursor:pointer;padding:2px;color:var(--tm);
+  flex-shrink:0;font-size:15px;line-height:1;font-family:var(--f);border-radius:50%;
+}
+.draft-todo-del:hover{color:var(--err);background:var(--muted)}
+
+/* ── Add-form: text/todo type toggle, sits beside the datetime input ── */
+.type-toggle{display:flex;gap:2px;background:var(--muted);border-radius:999px;padding:2px}
+.type-toggle button{
+  font-size:12px;font-weight:500;padding:5px 11px;border:none;border-radius:999px;
+  background:transparent;color:var(--t2);cursor:pointer;font-family:var(--f);
+  transition:background .12s,color .12s;
+}
+.type-toggle button.on{background:var(--surface);color:var(--acc-t);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+/* ── Comments — unobtrusive, collapsed by default, immutable once posted ── */
+.comments{margin-top:6px;padding:0 4px}
+.comments-toggle{
+  display:inline-flex;align-items:center;gap:4px;background:none;border:none;cursor:pointer;
+  font-size:11px;color:var(--tm);font-family:var(--f);padding:2px 0;
+}
+.comments-toggle:hover{color:var(--t2)}
+.comments-panel{margin-top:6px;display:flex;flex-direction:column;gap:6px}
+.comment-item{display:flex;align-items:flex-start;gap:6px}
+.comment-body{flex:1;min-width:0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.comment-item .t-text{font-size:12px;color:var(--t2)}
+.comment-time{font-size:10px;color:var(--tm);flex-shrink:0}
+.comment-del{
+  background:none;border:none;cursor:pointer;padding:2px;color:var(--tm);
+  flex-shrink:0;font-size:14px;line-height:1;font-family:var(--f);border-radius:50%;
+}
+.comment-del:hover{color:var(--err);background:var(--muted)}
+.comment-add{display:flex;gap:6px;margin-top:2px}
+.comment-add .inp{font-size:12px}
 
 /* ── Empty state ── */
+
 .empty{text-align:center;padding:4.5rem 0;color:var(--tm)}
 .empty svg{display:block;margin:0 auto 14px;opacity:.3}
 .empty-title{font-size:14px;color:var(--t2);margin-bottom:5px}
@@ -392,6 +368,17 @@ function formatDT(dt) {
   };
 }
 
+/* Comments store a real UTC ISO timestamp (Date#toISOString, from
+   new Date()) rather than the naive local datetime entries use, so this
+   goes through an actual Date object to convert to local wall-clock time
+   correctly instead of just slicing the string. */
+function formatCommentTime(iso) {
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
 /* ── Demo data ── */
 const DEMO = [
   {
@@ -428,10 +415,10 @@ const DEMO = [
 /* ── State ── */
 let entries        = [];
 let addFormOpen    = false;
-let editingId      = null;
-let editDraft      = {datetime:'', title:'', content:'', cols:2};
+let addType        = 'text'; // 'text' | 'todo' — chosen when creating, fixed afterward
+let addDraft       = { datetime: '', content: '', projectTitle: '', todos: [] }; // todos: [{id,text}], pre-creation only (still removable)
 let confirmDeleteId= null;
-let lastAddedFor   = null;
+let expandedComments = new Set(); // entry ids whose comment panel is open
 
 /* filters */
 let filterYear     = ''; // 'YYYY'
@@ -445,38 +432,64 @@ let filterPopoverOpen   = false; // year/month picker, collapsed behind a filter
 let searchComposing     = false;
 let searchDebounceTimer = null;
 
-/* ── Drag state ── */
-let dragSrc    = null; // { eid, tid }               — dragging a todo item
-let dropTarget = null; // { eid, tid, pos } | { eid, col, pos:'end' } — where it will land
-let colDragSrc = null; // { eid, colIdx }             — dragging an entire project (column)
-
 /* ── Persistence ── */
 function loadData() {
   try {
     const s   = localStorage.getItem('tl-v4');
     let   raw = s ? JSON.parse(s) : JSON.parse(JSON.stringify(DEMO));
-    entries = raw.map(e => {
-      // migrate datetime
-      if (!e.datetime && e.date) {
-        const { date, ...rest } = e;
-        e = { ...rest, datetime: date + 'T00:00:00' };
-      }
-      // migrate todos: assign col if missing (distribute round-robin by cols)
-      const cols = e.cols || 2;
-      const todos = (e.todos || []).map((t, i) => ({
-        ...t,
-        col: (t.col !== undefined && t.col < cols) ? t.col : (i % cols)
-      }));
-      // migrate column titles: pad/truncate to current col count
-      const prevTitles = Array.isArray(e.colTitles) ? e.colTitles : [];
-      const colTitles  = Array.from({length: cols}, (_, ci) => prevTitles[ci] || '');
-      return { ...e, todos, cols, colTitles, favorite: !!e.favorite };
-    });
+    entries = migrateEntries(raw);
   } catch {
-    entries = JSON.parse(JSON.stringify(DEMO));
+    entries = migrateEntries(JSON.parse(JSON.stringify(DEMO)));
   }
   renderHeader();
   renderAll();
+}
+
+/* Old entries mixed free-text content AND a multi-column todo list on the
+   same node. The new model splits those into two separate entry types
+   that live side by side on the timeline, so an old entry that had BOTH
+   gets split into two (a text entry + a todo entry, same datetime) rather
+   than picking one and silently dropping the other — nothing gets lost.
+   Multi-column todos collapse into one flat list; non-empty column
+   titles get folded into a single optional "project title". */
+function migrateEntries(raw) {
+  return raw.flatMap(e0 => {
+    let e = e0;
+    if (!e.datetime && e.date) {
+      const { date, ...rest } = e;
+      e = { ...rest, datetime: date + 'T00:00:00' };
+    }
+    e = { ...e, datetime: normDT(e.datetime) };
+    const favorite = !!e.favorite;
+    const comments = Array.isArray(e.comments) ? e.comments : [];
+    const hasContent = !!(e.content && e.content.trim());
+    const rawTodos    = Array.isArray(e.todos) ? e.todos : [];
+    const hasTodos    = rawTodos.length > 0;
+
+    // already-migrated entry (has an explicit type) — just backfill fields
+    if (e.type === 'text' || e.type === 'todo') {
+      return [{ ...e, favorite, comments }];
+    }
+
+    const flatTodos = rawTodos.map(t => ({ id: t.id || uid(), text: t.text || '', done: !!t.done }));
+    const projectTitle = (Array.isArray(e.colTitles) ? e.colTitles : []).find(t => t && t.trim()) || '';
+
+    const textPart = hasContent ? [{
+      id: e.id || uid(), datetime: e.datetime, type: 'text',
+      title: e.title || '', content: e.content, favorite, comments,
+    }] : [];
+    const todoPart = hasTodos ? [{
+      id: hasContent ? uid() : (e.id || uid()), datetime: e.datetime, type: 'todo',
+      projectTitle, todos: flatTodos, favorite: hasContent ? false : favorite,
+      comments: hasContent ? [] : comments,
+    }] : [];
+
+    if (!textPart.length && !todoPart.length) {
+      // neither content nor todos — keep as an empty text entry rather than dropping it
+      return [{ id: e.id || uid(), datetime: e.datetime, type: 'text', title: e.title || '', content: '', favorite, comments }];
+    }
+    return [...textPart, ...todoPart];
+  });
 }
 
 function save() {
@@ -501,9 +514,11 @@ function filteredList() {
   const fq = filterQuery.trim().toLowerCase();
   if (fq) {
     list = list.filter(e =>
-      (e.title   || '').toLowerCase().includes(fq) ||
-      (e.content || '').toLowerCase().includes(fq) ||
-      (e.todos   || []).some(t => (t.text || '').toLowerCase().includes(fq))
+      (e.title        || '').toLowerCase().includes(fq) ||
+      (e.content      || '').toLowerCase().includes(fq) ||
+      (e.projectTitle || '').toLowerCase().includes(fq) ||
+      (e.todos        || []).some(t => (t.text || '').toLowerCase().includes(fq)) ||
+      (e.comments     || []).some(c => (c.text || '').toLowerCase().includes(fq))
     );
   }
   return list;
@@ -512,6 +527,7 @@ function filteredList() {
 /* ── Actions ── */
 window.toggleAddForm = () => {
   addFormOpen = !addFormOpen;
+  if (addFormOpen) { addType = 'text'; addDraft = { datetime: nowLocalDT(), content: '', projectTitle: '', todos: [] }; }
   const btn = document.getElementById('add-btn');
   if (btn) btn.classList.toggle('btn-acc', addFormOpen);
   renderBody();
@@ -523,57 +539,86 @@ window.cancelAddForm = () => {
   renderBody();
 };
 
+/* Syncs whatever's currently in the visible fields back into addDraft
+   before a re-render swaps them out (switching type, adding a draft
+   todo) — otherwise typed-but-uncommitted text would be lost. */
+function syncAddDraft() {
+  const dateEl = q('#nw-date');
+  if (dateEl) addDraft.datetime = normDT(dateEl.value);
+  if (addType === 'text') {
+    const taEl = q('#nw-content');
+    if (taEl) addDraft.content = taEl.value;
+  } else {
+    const ptEl = q('#nw-ptitle');
+    if (ptEl) addDraft.projectTitle = ptEl.value;
+  }
+}
+
+/* Flushes whatever's still sitting unconfirmed in the "add todo" input as
+   one last draft item. Only called at the two moments that actually need
+   it (leaving todo mode, finalizing creation) — NOT from addDraftTodo or
+   delDraftTodo, which already handle that input themselves; calling it
+   there too was double-adding the item just typed. */
+function flushPendingTodoInput() {
+  const tiEl = q('#nw-todo-input');
+  const pending = (tiEl?.value || '').trim();
+  if (pending) addDraft.todos = [...addDraft.todos, { id: uid(), text: pending }];
+}
+
+window.toggleAddType = () => {
+  syncAddDraft();
+  if (addType === 'todo') flushPendingTodoInput();
+  addType = addType === 'text' ? 'todo' : 'text';
+  renderBody();
+  setTimeout(() => q(addType === 'text' ? '#nw-content' : '#nw-ptitle')?.focus(), 0);
+};
+
+window.addDraftTodo = () => {
+  const el = q('#nw-todo-input');
+  const text = (el?.value || '').trim();
+  if (!text) return;
+  syncAddDraft();
+  addDraft.todos = [...addDraft.todos, { id: uid(), text }];
+  renderBody();
+  setTimeout(() => q('#nw-todo-input')?.focus(), 0);
+};
+window.delDraftTodo = (tid) => {
+  syncAddDraft();
+  addDraft.todos = addDraft.todos.filter(t => t.id !== tid);
+  renderBody();
+};
+
 window.createEntry = () => {
-  const dt      = normDT(q('#nw-date')?.value || '');
-  const content = (q('#nw-content')?.value || '').trim();
+  syncAddDraft();
+  if (addType === 'todo') flushPendingTodoInput();
+  const dt = addDraft.datetime;
   if (!dt) return;
-  const title = content.split('\n')[0].slice(0, 60);
-  entries.push({ id: uid(), datetime: dt, title, content, todos: [], cols: 2, colTitles: ['',''], favorite: false });
+
+  if (addType === 'text') {
+    const content = addDraft.content.trim();
+    const title   = content.split('\n')[0].slice(0, 60);
+    entries.push({ id: uid(), datetime: dt, type: 'text', title, content, favorite: false, comments: [] });
+  } else {
+    entries.push({
+      id: uid(), datetime: dt, type: 'todo',
+      projectTitle: addDraft.projectTitle.trim(),
+      todos: addDraft.todos.map(t => ({ id: t.id, text: t.text, done: false })),
+      favorite: false, comments: [],
+    });
+  }
+
   addFormOpen = false;
   const btn = document.getElementById('add-btn');
   if (btn) btn.classList.remove('btn-acc');
   save(); renderAll();
 };
 
-window.startEdit = (id) => {
-  const e = entries.find(x => x.id === id);
-  if (!e) return;
-  editingId = id;
-  editDraft = { datetime: e.datetime, title: e.title, content: e.content, cols: e.cols };
-  renderBody();
-};
-window.setDraftDate    = (v) => { editDraft.datetime = normDT(v); };
-window.setDraftCols = (n) => {
-  if (editingId) {
-    editDraft.datetime = normDT(q('#ed-date')?.value ?? editDraft.datetime);
-    editDraft.content  = q('#ed-ta')?.value    ?? editDraft.content;
-  }
-  editDraft.cols = n;
-  // Re-clamp todos to new col count
-  entries = entries.map(e => e.id !== editingId ? e : {
-    ...e,
-    todos: e.todos.map(t => ({ ...t, col: Math.min(t.col, n - 1) }))
-  });
-  renderBody();
-};
-window.saveEdit = (id) => {
-  const dt      = normDT(q('#ed-date')?.value ?? editDraft.datetime);
-  const content = (q('#ed-ta')?.value    ?? editDraft.content).trim();
-  const title   = content.split('\n')[0].slice(0, 60);
-  entries = entries.map(e => e.id === id
-    ? { ...e, datetime: dt, title, content, cols: editDraft.cols }
-    : e);
-  editingId = null;
-  save(); renderAll();
-};
-window.cancelEdit = () => { editingId = null; renderBody(); };
-
 window.askDelete    = (id) => { confirmDeleteId = id; renderBody(); };
 window.cancelDelete = ()   => { confirmDeleteId = null; renderBody(); };
 window.doDelete     = (id) => {
   entries = entries.filter(e => e.id !== id);
   confirmDeleteId = null;
-  if (editingId === id) editingId = null;
+  expandedComments.delete(id);
   save(); renderAll();
 };
 
@@ -590,6 +635,31 @@ window.toggleFavFilter = () => {
     btn.innerHTML = icon('star', 14, filterFavOnly);
   }
   renderAll();
+};
+
+/* ── Comments — collapsed by default; posting/deleting is allowed,
+   editing an existing comment's text is not. ── */
+window.toggleComments = (id) => {
+  if (expandedComments.has(id)) expandedComments.delete(id);
+  else expandedComments.add(id);
+  renderBody();
+  if (expandedComments.has(id)) setTimeout(() => q(`#cm-input-${id}`)?.focus(), 0);
+};
+window.addComment = (id) => {
+  const el   = q(`#cm-input-${id}`);
+  const text = (el?.value || '').trim();
+  if (!text) return;
+  entries = entries.map(e => e.id !== id ? e : {
+    ...e, comments: [...(e.comments || []), { id: uid(), text, createdAt: new Date().toISOString() }]
+  });
+  expandedComments.delete(id);
+  save(); renderAll();
+};
+window.delComment = (id, cid) => {
+  entries = entries.map(e => e.id !== id ? e : {
+    ...e, comments: (e.comments || []).filter(c => c.id !== cid)
+  });
+  save(); renderAll();
 };
 
 /* ── Data import / export ──
@@ -631,26 +701,21 @@ function parseImportText(text) {
     : null;
   if (!raw) return { ok: false, error: '文件中找不到有效的节点数据。' };
 
-  const imported = raw
-    .filter(e => e && (e.datetime || e.date))
-    .map(e => ({
-      id: e.id || uid(),
-      datetime: normDT(e.datetime || e.date || ''),
-      title: e.title || '',
-      content: e.content || '',
-      favorite: !!e.favorite,
-      cols: [1, 2, 3, 4].includes(e.cols) ? e.cols : 2,
-      colTitles: Array.isArray(e.colTitles) ? e.colTitles.map(String) : [],
-      todos: Array.isArray(e.todos) ? e.todos.map(t => ({
-        id: t.id || uid(),
-        text: t.text || '',
-        done: !!t.done,
-        col: Number.isInteger(t.col) ? t.col : 0,
-      })) : [],
-    }));
+  const withDates = raw.filter(e => e && (e.datetime || e.date));
+  if (!withDates.length) return { ok: false, error: '文件中找不到有效的节点数据。' };
 
+  // Same migration path as local storage — handles both the current
+  // format and older exports (mixed content+todos, multi-column) alike,
+  // splitting anything mixed into a text entry + a todo entry.
+  const imported = migrateEntries(withDates).map(e => ({ ...e, id: uid() }));
   if (!imported.length) return { ok: false, error: '文件中找不到有效的节点数据。' };
   return { ok: true, imported };
+}
+
+function importDedupKey(e) {
+  return e.type === 'todo'
+    ? `todo||${e.datetime}||${e.projectTitle || ''}||${(e.todos || []).map(t => t.text).join('|')}`
+    : `text||${e.datetime}||${e.content || ''}`;
 }
 
 /* 全覆盖：用导入的数据整体替换当前所有节点 */
@@ -665,13 +730,13 @@ window.doImportOverwrite = (text) => {
   alert(`导入成功，共 ${imported.length} 个节点。`);
 };
 
-/* 仅增加不重复：跳过与现有节点 datetime+content 完全一致的条目，其余追加到末尾 */
+/* 仅增加不重复：跳过与现有节点内容完全一致的条目，其余追加到末尾 */
 window.doImportMerge = (text) => {
   const res = parseImportText(text);
   if (!res.ok) { alert('导入失败：' + res.error); return; }
   const imported = res.imported;
-  const existingKeys = new Set(entries.map(e => `${e.datetime}||${e.content}`));
-  const toAdd = imported.filter(e => !existingKeys.has(`${e.datetime}||${e.content}`));
+  const existingKeys = new Set(entries.map(importDedupKey));
+  const toAdd = imported.filter(e => !existingKeys.has(importDedupKey(e)));
 
   if (!toAdd.length) { alert('没有发现新节点，所有数据均已存在，未做任何改动。'); return; }
   const skipped = imported.length - toAdd.length;
@@ -775,193 +840,14 @@ function commitSearch(v) {
   renderAll();
 }
 
+/* Checking items off is still allowed after creation (that's just using
+   the list) — but the item set and order are fixed once created, so
+   there's no add/delete/reorder here anymore. */
 window.toggleTodo = (eid, tid) => {
   entries = entries.map(e => e.id !== eid ? e : {
     ...e, todos: e.todos.map(t => t.id !== tid ? t : { ...t, done: !t.done })
   });
   save(); renderAll();
-};
-window.delTodo = (eid, tid) => {
-  entries = entries.map(e => e.id !== eid ? e : {
-    ...e, todos: e.todos.filter(t => t.id !== tid)
-  });
-  save(); renderAll();
-};
-window.addTodo = (eid) => {
-  const el   = q('#ti-' + eid);
-  const text = (el?.value || '').trim();
-  if (!text) return;
-  const e = entries.find(x => x.id === eid);
-  const cols = e ? e.cols : 2;
-  // Find smallest column
-  const colCounts = Array.from({length: cols}, (_, ci) =>
-    (e?.todos || []).filter(t => t.col === ci).length
-  );
-  const targetCol = colCounts.indexOf(Math.min(...colCounts));
-  entries = entries.map(en => en.id !== eid ? en : {
-    ...en, todos: [...en.todos, { id: uid(), text, done: false, col: targetCol }]
-  });
-  lastAddedFor = eid;
-  save(); renderAll();
-};
-
-/* ── Drag & Drop: reordering todos within/between projects ──
-   Order is simply the position of each todo inside entries[].todos — the
-   array itself IS the source of truth for display order (per column via
-   filter), so once persisted via save() the order survives a refresh. */
-window.onTodoDragStart = (eid, tid, event) => {
-  dragSrc = { eid, tid };
-  event.dataTransfer.effectAllowed = 'move';
-  event.dataTransfer.setData('text/plain', tid);
-  event.stopPropagation();
-  // add dragging class after paint
-  setTimeout(() => {
-    const el = document.getElementById('todo-' + tid);
-    if (el) el.classList.add('dragging');
-  }, 0);
-};
-window.onTodoDragEnd = (tid) => {
-  dragSrc = null;
-  dropTarget = null;
-  const el = document.getElementById('todo-' + tid);
-  if (el) el.classList.remove('dragging');
-  clearDragIndicators();
-};
-function clearDragIndicators() {
-  document.querySelectorAll('.todo-col.drag-over').forEach(c => c.classList.remove('drag-over'));
-  document.querySelectorAll('.todo-col.col-drag-over').forEach(c => c.classList.remove('col-drag-over'));
-  document.querySelectorAll('.todo-item.drop-before,.todo-item.drop-after')
-    .forEach(el => el.classList.remove('drop-before', 'drop-after'));
-}
-
-/* Hovering a specific todo item — decide insert-before / insert-after based
-   on cursor position, so items can be reordered top-to-bottom by hand. */
-window.onItemDragOver = (event, eid, tid) => {
-  if (!dragSrc || colDragSrc) return;
-  if (dragSrc.tid === tid) return;
-  event.preventDefault();
-  event.stopPropagation();
-  event.dataTransfer.dropEffect = 'move';
-  const rect   = event.currentTarget.getBoundingClientRect();
-  const before = (event.clientY - rect.top) < rect.height / 2;
-  document.querySelectorAll('.todo-item.drop-before,.todo-item.drop-after')
-    .forEach(el => el.classList.remove('drop-before', 'drop-after'));
-  event.currentTarget.classList.add(before ? 'drop-before' : 'drop-after');
-  dropTarget = { eid, tid, pos: before ? 'before' : 'after' };
-};
-
-/* Hovering the column itself (empty space / project-level drag) */
-window.onColDragOver = (event, eid, colIdx) => {
-  event.preventDefault();
-  event.dataTransfer.dropEffect = 'move';
-  const col = document.getElementById(`col-${eid}-${colIdx}`);
-  if (colDragSrc) {
-    if (colDragSrc.eid !== eid || colDragSrc.colIdx === colIdx) return;
-    document.querySelectorAll('.todo-col.col-drag-over').forEach(c => c.classList.remove('col-drag-over'));
-    if (col) col.classList.add('col-drag-over');
-    return;
-  }
-  if (col && !col.classList.contains('drag-over')) col.classList.add('drag-over');
-  // Only treat as an "end of column" drop target when not hovering a specific
-  // item (item handler stops propagation, so this only fires over empty space).
-  dropTarget = { eid, col: colIdx, pos: 'end' };
-};
-window.onColDragLeave = (eid, colIdx) => {
-  const col = document.getElementById(`col-${eid}-${colIdx}`);
-  if (col) { col.classList.remove('drag-over'); col.classList.remove('col-drag-over'); }
-};
-window.onColDrop = (event, eid, colIdx) => {
-  event.preventDefault();
-  clearDragIndicators();
-
-  /* ── Project (whole column) reorder ── */
-  if (colDragSrc) {
-    if (colDragSrc.eid === eid && colDragSrc.colIdx !== colIdx) {
-      moveColumn(eid, colDragSrc.colIdx, colIdx);
-    }
-    colDragSrc = null;
-    return;
-  }
-
-  /* ── Todo item move / reorder ── */
-  if (!dragSrc) { dropTarget = null; return; }
-  const { eid: srcEid, tid } = dragSrc;
-  if (srcEid !== eid) { dragSrc = null; dropTarget = null; return; } // cross-entry not supported
-  const dt = dropTarget;
-  entries = entries.map(e => {
-    if (e.id !== eid) return e;
-    const todos  = [...e.todos];
-    const srcIdx = todos.findIndex(t => t.id === tid);
-    if (srcIdx === -1) return e;
-    const [item] = todos.splice(srcIdx, 1);
-    item.col = colIdx;
-    let insertIdx;
-    if (dt && dt.eid === eid && dt.tid && dt.tid !== tid) {
-      const tIdx = todos.findIndex(t => t.id === dt.tid);
-      insertIdx = tIdx === -1 ? todos.length : (dt.pos === 'before' ? tIdx : tIdx + 1);
-    } else {
-      let lastIdx = -1;
-      todos.forEach((t, i) => { if (t.col === colIdx) lastIdx = i; });
-      insertIdx = lastIdx === -1 ? todos.length : lastIdx + 1;
-    }
-    todos.splice(insertIdx, 0, item);
-    return { ...e, todos };
-  });
-  dragSrc = null;
-  dropTarget = null;
-  save(); renderAll();
-};
-
-/* ── Drag & Drop: reordering entire projects (columns) as blocks ── */
-window.onColHeadDragStart = (event, eid, colIdx) => {
-  colDragSrc = { eid, colIdx };
-  event.dataTransfer.effectAllowed = 'move';
-  event.dataTransfer.setData('text/plain', 'col:' + colIdx);
-  setTimeout(() => {
-    const el = document.getElementById(`col-${eid}-${colIdx}`);
-    if (el) el.classList.add('col-dragging');
-  }, 0);
-};
-window.onColHeadDragEnd = (eid, colIdx) => {
-  colDragSrc = null;
-  const el = document.getElementById(`col-${eid}-${colIdx}`);
-  if (el) el.classList.remove('col-dragging');
-  clearDragIndicators();
-};
-
-function moveColumn(eid, fromIdx, toIdx) {
-  entries = entries.map(e => {
-    if (e.id !== eid) return e;
-    const titles = Array.from({length: e.cols}, (_, ci) => (e.colTitles && e.colTitles[ci]) || '');
-    const [moved] = titles.splice(fromIdx, 1);
-    titles.splice(toIdx, 0, moved);
-    // build old-index → new-index map from the same splice operation
-    const perm = Array.from({length: e.cols}, (_, i) => i);
-    const [movedIdx] = perm.splice(fromIdx, 1);
-    perm.splice(toIdx, 0, movedIdx);
-    const oldToNew = {};
-    perm.forEach((oldIdx, newPos) => { oldToNew[oldIdx] = newPos; });
-    const todos = e.todos.map(t => ({ ...t, col: oldToNew[t.col] ?? t.col }));
-    return { ...e, colTitles: titles, todos };
-  });
-  save(); renderAll();
-}
-
-/* ── Project (column) title — auto-saves on Enter or on blur ── */
-window.onColTitleKeydown = (event) => {
-  if (event.key === 'Enter') { event.preventDefault(); event.target.blur(); }
-};
-window.onColTitleBlur = (eid, colIdx, el) => {
-  const val = el.value.trim();
-  el.value = val;
-  entries = entries.map(e => {
-    if (e.id !== eid) return e;
-    const titles = Array.isArray(e.colTitles) ? [...e.colTitles] : [];
-    while (titles.length <= colIdx) titles.push('');
-    titles[colIdx] = val;
-    return { ...e, colTitles: titles };
-  });
-  save();
 };
 
 /* ── Helpers ── */
@@ -982,7 +868,7 @@ function autoResizeAll() {
   document.querySelectorAll('.ta').forEach(autoResize);
 }
 
-window.onTaChange = (el, stateKey) => {
+window.onTaChange = (el) => {
   autoResize(el);
   const cc = el.nextElementSibling;
   if (cc && cc.classList.contains('char-cc')) {
@@ -990,7 +876,6 @@ window.onTaChange = (el, stateKey) => {
     cc.textContent = `${n} / ${MAX}`;
     cc.style.color = n > MAX * 0.85 ? 'var(--warn)' : 'var(--tm)';
   }
-  if (stateKey === 'content') editDraft.content = el.value;
 };
 
 /* ── SVG icons ── */
@@ -998,7 +883,7 @@ function icon(name, size, filled) {
   size = size || 14;
   const d = {
     plus  :`<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>`,
-    pen   :`<path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>`,
+    comment:`<path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/>`,
     bin   :`<polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/>`,
     doc   :`<path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><polyline points="13 2 13 9 20 9"/>`,
     search:`<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>`,
@@ -1047,12 +932,7 @@ function renderBody() {
       : buildTimeline(list)}`;
   autoResizeAll();
 
-  if (addFormOpen)  setTimeout(() => q('#nw-content')?.focus(), 0);
-  if (editingId)    setTimeout(() => q('#ed-ta')?.focus(), 0);
-  if (lastAddedFor) setTimeout(() => {
-    q('#ti-' + lastAddedFor)?.focus();
-    lastAddedFor = null;
-  }, 0);
+  if (addFormOpen)  setTimeout(() => q(addType === 'text' ? '#nw-content' : '#nw-ptitle')?.focus(), 0);
 }
 
 function greetingText() {
@@ -1126,16 +1006,43 @@ function buildHeader() {
 
 
 function buildAddForm() {
-  return `
-  <div class="add-form">
+  const contentField = `
     <textarea class="ta" id="nw-content" maxlength="${MAX}"
       placeholder="描述内容（支持换行，最多 ${MAX} 字符；Enter 保存 / Shift+Enter 换行）"
-      oninput="onTaChange(this,'new')"
-      onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();createEntry();}"></textarea>
-    <div class="char-cc">0 / ${MAX}</div>
-    <div class="form-foot" style="margin-top:10px">
+      oninput="onTaChange(this)"
+      onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();createEntry();}">${esc(addDraft.content)}</textarea>
+    <div class="char-cc">${addDraft.content.length} / ${MAX}</div>`;
+
+  const todoField = `
+    <input class="inp" id="nw-ptitle" type="text" maxlength="24"
+      placeholder="项目标题（选填）"
+      value="${esc(addDraft.projectTitle)}"
+      style="margin-bottom:10px">
+    ${addDraft.todos.length ? `
+    <div class="draft-todo-list" style="margin-bottom:6px">
+      ${addDraft.todos.map(t => `
+        <div class="draft-todo">
+          <span class="t-text">${esc(t.text)}</span>
+          <button class="draft-todo-del" onclick="delDraftTodo('${t.id}')" aria-label="删除">×</button>
+        </div>`).join('')}
+    </div>` : ''}
+    <input class="inp" id="nw-todo-input" type="text"
+      placeholder="输入待办，Enter 添加"
+      onkeydown="if(event.key==='Enter'){event.preventDefault();addDraftTodo();}">`;
+
+  return `
+  <div class="add-form">
+    <div class="form-foot" style="margin-bottom:10px">
       <input class="inp inp-date" type="datetime-local" step="1" id="nw-date"
-        value="${esc(nowLocalDT())}">
+        value="${esc(addDraft.datetime || nowLocalDT())}">
+      <div class="type-toggle">
+        <button class="${addType === 'text' ? 'on' : ''}" onclick="addType==='todo' && toggleAddType()">文字</button>
+        <button class="${addType === 'todo' ? 'on' : ''}" onclick="addType==='text' && toggleAddType()">待办</button>
+      </div>
+    </div>
+    ${addType === 'text' ? contentField : todoField}
+    <div class="form-foot" style="margin-top:10px">
+      <span></span>
       <div style="display:flex;gap:8px;flex-shrink:0">
         <button class="btn btn-sm" onclick="cancelAddForm()">取消</button>
         <button class="btn btn-sm btn-acc" onclick="createEntry()">创建</button>
@@ -1177,165 +1084,95 @@ function buildTimeline(list) {
 }
 
 function buildEntry(e, isNewest, showDate) {
-  const isEdit = editingId === e.id;
-  const isDel  = confirmDeleteId === e.id;
-  const cols   = isEdit ? editDraft.cols : e.cols;
-  const content= isEdit ? editDraft.content : e.content;
-  const cLen   = content.length;
-
-  const { time: dTime, day: dDay, ym: dYm } = formatDT(isEdit ? editDraft.datetime : e.datetime);
-
-  const totalCount = e.todos.length;
-  const colTitles  = e.colTitles || []; // titles auto-save independently of edit mode
+  const isDel = confirmDeleteId === e.id;
+  const { time: dTime, day: dDay, ym: dYm } = formatDT(e.datetime);
 
   /* ── Time column (left of the spine) — only the day number is shown
      prominently, and only on the earliest entry of each day (showDate);
      year/month live in the floating scroll badge instead (see bottom of
      this file). Every entry's own time stays quiet/de-emphasized. ── */
-  const timeColHtml = isEdit
-    ? `<input class="inp inp-date" type="datetime-local" step="1" id="ed-date"
-        value="${esc(editDraft.datetime)}" onchange="setDraftDate(this.value)">`
-    : `<time>
-        ${showDate ? `<span class="e-date-hd">${esc(dDay)}<span class="e-date-suffix">日</span></span>` : ''}
-        <span class="e-time${showDate ? '' : ' e-time-solo'}">${esc(dTime)}</span>
-       </time>
-       ${isNewest ? '<span class="badge">最新</span>' : ''}`;
+  const timeColHtml = `<time>
+      ${showDate ? `<span class="e-date-hd">${esc(dDay)}<span class="e-date-suffix">日</span></span>` : ''}
+      <span class="e-time${showDate ? '' : ' e-time-solo'}">${esc(dTime)}</span>
+     </time>
+     ${isNewest ? '<span class="badge">最新</span>' : ''}`;
 
-  /* ── Controls ── */
+  /* ── Controls: favorite / comment / delete — nothing here modifies the
+     entry's own content, since there's no edit mode anymore. ── */
   const favBtn = `<button class="btn btn-icon${e.favorite ? ' fav-on' : ''}"
         aria-label="${e.favorite ? '取消收藏' : '收藏'}" title="${e.favorite ? '取消收藏' : '收藏'}"
         onclick="toggleFavorite('${e.id}')">${icon('star', 14, e.favorite)}</button>`;
+  const commentCount = (e.comments || []).length;
+  const commentBtn = `<button class="btn btn-icon${commentCount ? ' fav-on' : ''}"
+        aria-label="评论" title="评论"
+        onclick="toggleComments('${e.id}')">${icon('comment', 14)}</button>`;
 
-  const ctrls = isEdit
-    ? `<button class="btn btn-sm btn-acc" onclick="saveEdit('${e.id}')">保存</button>
-       <button class="btn btn-sm" onclick="cancelEdit()">取消</button>`
-    : isDel
+  const ctrls = isDel
     ? `<div class="confirm-row">
         <span class="confirm-txt">确认删除?</span>
         <button class="btn btn-sm btn-err" onclick="doDelete('${e.id}')">是</button>
         <button class="btn btn-sm" onclick="cancelDelete()">否</button>
        </div>`
-    : `${favBtn}
-       <button class="btn btn-icon" aria-label="编辑"
-          onclick="startEdit('${e.id}')">${icon('pen', 14)}</button>
+    : `${favBtn}${commentBtn}
        <button class="btn btn-icon" aria-label="删除"
           onclick="askDelete('${e.id}')">${icon('bin', 14)}</button>`;
 
-  /* ── Content area ── */
-  const contentHtml = isEdit
-    ? `<div style="margin-bottom:14px">
-        <textarea class="ta" id="ed-ta" maxlength="${MAX}"
-          placeholder="输入正文，支持换行（最多 ${MAX} 字符；Enter 保存 / Shift+Enter 换行）"
-          oninput="onTaChange(this,'content')"
-          onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();saveEdit('${e.id}');}">${esc(content)}</textarea>
-        <div class="char-cc" style="color:${cLen>MAX*.85?'var(--warn)':'var(--tm)'}">${cLen} / ${MAX}</div>
+  /* ── Body: either free text, or a single-column todo list — an entry
+     is one or the other, chosen when it was created. ── */
+  const bodyHtml = e.type === 'todo'
+    ? `${e.projectTitle ? `<div class="proj-title">${esc(e.projectTitle)}</div>` : ''}
+       <div class="todo-list">
+         ${e.todos.length ? e.todos.map(t => `
+           <div class="todo-item">
+             <button class="t-check" onclick="toggleTodo('${e.id}','${t.id}')"
+               aria-label="${t.done ? '取消完成' : '标记完成'}">${checkboxIcon(t.done)}</button>
+             <span class="t-text${t.done ? ' done' : ''}">${esc(t.text)}</span>
+           </div>`).join('') : '<p class="todo-empty">（空待办）</p>'}
        </div>`
-    : e.content
-    ? `<p class="e-content">${esc(e.content)}</p>`
-    : '';
+    : (e.content ? `<p class="e-content">${esc(e.content)}</p>` : '');
 
-  /* ── Column switcher (编辑模式，控制项目个数) ── */
-  const colsSw = isEdit
-    ? `<div class="cols-sw">
-        <span class="cols-lbl">项目数</span>
-        ${[1,2,3,4].map(n =>
-          `<button class="col-btn${cols===n?' on':''}" onclick="setDraftCols(${n})">${n}</button>`
-        ).join('')}
-       </div>`
-    : '';
-
-  /* ── Todo grid — each column is a "project": a drag handle + a title
-     input that auto-saves on Enter/blur, plus its todos which can be
-     manually dragged to reorder within the project or moved across
-     projects. The whole project block can also be dragged (via the grip)
-     to reorder projects, which auto-saves too. ── */
-  const gridHtml = (totalCount || isEdit || colTitles.some(t => t && t.trim()))
-    ? `<div class="todos-grid" style="grid-template-columns:repeat(${cols},minmax(0,1fr))">
-        ${Array.from({length: cols}, (_, ci) => {
-          const colTodos = e.todos.filter(t => t.col === ci);
-          const colTitle = colTitles[ci] || '';
-          const titleHtml = isEdit
-            ? `<input class="inp col-title-inp" type="text" maxlength="24"
-                placeholder="项目标题"
-                value="${esc(colTitle)}"
-                onkeydown="onColTitleKeydown(event)"
-                onblur="onColTitleBlur('${e.id}',${ci},this)">`
-            : `<span class="col-title-txt${colTitle ? '' : ' col-title-empty'}">${colTitle ? esc(colTitle) : '未命名项目'}</span>`;
-          return `<div class="todo-col" id="col-${e.id}-${ci}"
-            ondragover="onColDragOver(event,'${e.id}',${ci})"
-            ondragleave="onColDragLeave('${e.id}',${ci})"
-            ondrop="onColDrop(event,'${e.id}',${ci})">
-            <div class="col-head">
-              <span class="col-grip" draggable="true" title="拖动整个项目排序"
-                ondragstart="onColHeadDragStart(event,'${e.id}',${ci})"
-                ondragend="onColHeadDragEnd('${e.id}',${ci})">${icon('grip', 14, true)}</span>
-              ${titleHtml}
+  /* ── Comments — live outside the card (a quieter, detached strip below
+     it), and the section doesn't exist at all unless there's something to
+     show: either existing comments, or the panel was just opened to write
+     the first one. Collapsed by default; immutable once posted (add or
+     delete only, no editing). ── */
+  const commentsOpen = expandedComments.has(e.id);
+  const comments = e.comments || [];
+  const showComments = comments.length > 0 || commentsOpen;
+  const commentsHtml = showComments ? `
+    <div class="comments">
+      <button class="comments-toggle" onclick="toggleComments('${e.id}')">
+        ${icon('comment', 11)} 评论${comments.length ? ` (${comments.length})` : ''}
+      </button>
+      ${commentsOpen ? `
+      <div class="comments-panel">
+        ${comments.map(c => `
+          <div class="comment-item">
+            <div class="comment-body">
+              <span class="t-text">${esc(c.text)}</span>
+              <span class="comment-time">${esc(formatCommentTime(c.createdAt))}</span>
             </div>
-            ${colTodos.map(t => `
-              <div class="todo-item" id="todo-${t.id}"
-                draggable="true"
-                ondragstart="onTodoDragStart('${e.id}','${t.id}',event)"
-                ondragend="onTodoDragEnd('${t.id}')"
-                ondragover="onItemDragOver(event,'${e.id}','${t.id}')">
-                <button class="t-check" onclick="toggleTodo('${e.id}','${t.id}')"
-                  aria-label="${t.done?'取消完成':'标记完成'}">${checkboxIcon(t.done)}</button>
-                <span class="t-text${t.done?' done':''}">${esc(t.text)}</span>
-                ${isEdit ? `<button class="t-del" onclick="delTodo('${e.id}','${t.id}')" aria-label="删除">×</button>` : ''}
-              </div>`).join('')}
-          </div>`;
-        }).join('')}
-       </div>`
-    : '';
-
-  /* ── Add todo — 仅编辑模式显示 ── */
-  const addTodoHtml = isEdit
-    ? `<div class="add-todo-edit">
-        <input class="inp" type="text" id="ti-${e.id}"
-          placeholder="输入待办，Enter 确认 / Esc 清空"
-          onkeydown="
-            if(event.key==='Enter'){event.preventDefault();addTodo('${e.id}')}
-            if(event.key==='Escape'){this.value=''}
-          ">
-       </div>`
-    : '';
-
-  /* ── Todos section:
-       • Edit mode  → always shown (needs col-switcher & add-input)
-       • View mode + todos or titled projects exist → show with "待办" label
-       • View mode + nothing to show → hidden entirely ── */
-  let todosHtml = '';
-  if (isEdit) {
-    todosHtml = `
-    <div class="todos">
-      <div class="todos-hdr">
-        <span class="todos-lbl">待办</span>
-        ${colsSw}
-      </div>
-      ${gridHtml}
-      ${addTodoHtml}
-    </div>`;
-  } else if (gridHtml) {
-    todosHtml = `
-    <div class="todos">
-      <div class="todos-hdr">
-        <span class="todos-lbl">待办</span>
-      </div>
-      ${gridHtml}
-    </div>`;
-  }
+            <button class="comment-del" onclick="delComment('${e.id}','${c.id}')" aria-label="删除评论">×</button>
+          </div>`).join('')}
+        <div class="comment-add">
+          <input class="inp" id="cm-input-${e.id}" type="text" placeholder="写条评论，Enter 发送"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();addComment('${e.id}');}">
+        </div>
+      </div>` : ''}
+    </div>` : '';
 
   return `
   <div class="entry" data-ym="${esc(dYm)}">
-    <div class="time-col${isEdit ? ' editing' : ''}">${timeColHtml}</div>
+    <div class="time-col">${timeColHtml}</div>
     <div class="dot-col">
       <div class="dot${isNewest?' dot-latest':''}"></div>
     </div>
     <div class="entry-body">
       <div class="card">
-        ${contentHtml}
-        ${todosHtml}
-        <div class="e-ctrls-float${(isEdit || isDel) ? ' show' : ''}">${ctrls}</div>
+        ${bodyHtml}
+        <div class="e-ctrls-float${isDel ? ' show' : ''}">${ctrls}</div>
       </div>
+      ${commentsHtml}
     </div>
   </div>`;
 }

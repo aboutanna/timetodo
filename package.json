@@ -1,6 +1,6 @@
 {
   "name": "timeline-sidebar",
-  "version": "1.5.2",
+  "version": "1.5.4",
   "description": "时间线 —— 悬停展开 / 固定常驻的左侧桌面侧栏",
   "main": "main.js",
   "author": "",
